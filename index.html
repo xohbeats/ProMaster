@@ -3,493 +3,716 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Audio Analyzer & Mastering</title>
+    <title>ProMaster Audio Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        inter: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        'neutral-850': '#1c1c1c',
-                        'purple-650': '#7c3aed',
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            background-color: #0d0d0d;
         }
-        canvas {
-            display: block;
-            background-color: #0f0f0f;
-            border-radius: 0.75rem;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        /* Custom scrollbar for a more modern look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e1b4b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6366f1;
+        }
+        /* Custom styles for sliders */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #312e81;
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+        input[type=range]:hover {
+            opacity: 1;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #a78bfa;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #1e1b4b;
+        }
+        input[type=range]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #a78bfa;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #1e1b4b;
         }
     </style>
 </head>
-<body class="bg-neutral-950 text-neutral-200 antialiased p-8 flex flex-col items-center justify-center min-h-screen">
+<body class="bg-gray-900 text-white antialiased">
 
-    <!-- Main Container -->
-    <div class="w-full max-w-4xl bg-neutral-900 rounded-2xl p-8 shadow-2xl space-y-8 border border-neutral-800">
+    <div class="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-900 p-4 sm:p-6 lg:p-8">
+        <div class="max-w-7xl mx-auto">
+            
+            <!-- Header -->
+            <header class="text-center mb-8">
+                <h1 class="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400">ProMaster Audio Suite</h1>
+                <p class="text-indigo-200 mt-2">Your one-click solution for professional audio mastering.</p>
+            </header>
 
-        <!-- Header -->
-        <h1 class="text-3xl sm:text-4xl font-bold text-center text-purple-650">Audio Analyzer & Mastering</h1>
-        <p class="text-center text-neutral-400 max-w-2xl mx-auto">Upload an audio file to analyze its characteristics and apply real-time mastering effects like a noise gate and limiter.</p>
+            <main class="space-y-8">
+                <!-- File Upload Section -->
+                <div id="upload-section" class="bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-700/50">
+                    <h2 class="text-xl font-semibold mb-4 text-purple-300">1. Upload Your Track</h2>
+                    <div class="flex items-center justify-center w-full">
+                        <label for="audio-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer bg-gray-700/50 hover:bg-gray-700/80 transition-colors">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                <p class="mb-2 text-sm text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                <p class="text-xs text-gray-500">WAV, MP3, FLAC, or other audio formats</p>
+                            </div>
+                            <input id="audio-file" type="file" class="hidden" accept="audio/*" />
+                        </label>
+                    </div>
+                    <div id="file-info" class="mt-4 text-center text-indigo-300 hidden"></div>
+                </div>
 
-        <!-- File Input and Controls -->
-        <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <label for="audioFile" class="flex-1 w-full sm:w-auto cursor-pointer bg-purple-650 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-full transition-colors duration-300 text-center shadow-lg">
-                Choose Audio File
-            </label>
-            <input type="file" id="audioFile" accept="audio/*" class="hidden">
-            <button id="playPauseBtn" class="flex-1 w-full sm:w-auto bg-neutral-700 hover:bg-neutral-600 text-white font-semibold py-3 px-6 rounded-full transition-colors duration-300 shadow-lg" disabled>Play / Pause</button>
-        </div>
+                <!-- Main Mastering Tool UI (hidden by default) -->
+                <div id="mastering-tool" class="hidden">
+                    <!-- Waveform Display and Playback Controls -->
+                    <div class="bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-700/50 mb-8">
+                        <h2 class="text-xl font-semibold mb-4 text-purple-300">Playback & Visualization</h2>
+                        <canvas id="waveform" class="w-full h-32 bg-gray-900 rounded-lg"></canvas>
+                        <div id="playback-controls" class="flex items-center justify-center space-x-4 mt-4">
+                            <button id="play-btn" class="control-btn p-3 bg-indigo-600 hover:bg-indigo-500 rounded-full shadow-lg transition-transform transform hover:scale-110">
+                                <!-- Play icon (triangle) -->
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path></svg>
+                            </button>
+                            <button id="pause-btn" class="control-btn p-3 bg-indigo-600 hover:bg-indigo-500 rounded-full shadow-lg transition-transform transform hover:scale-110 hidden">
+                                <!-- Pause icon -->
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M5.75 3.75a.75.75 0 00-.75.75v11a.75.75 0 001.5 0v-11a.75.75 0 00-.75-.75zM14.25 3.75a.75.75 0 00-.75.75v11a.75.75 0 001.5 0v-11a.75.75 0 00-.75-.75z"></path></svg>
+                            </button>
+                            <button id="stop-btn" class="control-btn p-3 bg-indigo-600 hover:bg-indigo-500 rounded-full shadow-lg transition-transform transform hover:scale-110">
+                                <!-- Stop icon -->
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M5.25 3.75a.75.75 0 00-.75.75v11c0 .414.336.75.75.75h9.5a.75.75 0 00.75-.75v-11a.75.75 0 00-.75-.75h-9.5z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
 
-        <!-- Loading Indicator -->
-        <div id="loadingIndicator" class="hidden text-center text-purple-400 font-medium">
-            <div class="animate-pulse">Loading and analyzing audio...</div>
-        </div>
+                    <!-- Control Panels -->
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                        <!-- Equalizer -->
+                        <div class="control-panel bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-700/50">
+                            <h3 class="text-lg font-semibold mb-4 text-purple-300">Equalizer (EQ)</h3>
+                            <div class="space-y-4">
+                                <!-- Lows -->
+                                <div class="slider-group">
+                                    <label for="low-gain" class="text-sm">Lows (100 Hz)</label>
+                                    <input type="range" id="low-gain" min="-12" max="12" value="0" step="0.1" class="w-full">
+                                    <span id="low-gain-val" class="text-xs text-indigo-300">0.0 dB</span>
+                                </div>
+                                <!-- Mids -->
+                                <div class="slider-group">
+                                    <label for="mid-gain" class="text-sm">Mids (1 kHz)</label>
+                                    <input type="range" id="mid-gain" min="-12" max="12" value="0" step="0.1" class="w-full">
+                                    <span id="mid-gain-val" class="text-xs text-indigo-300">0.0 dB</span>
+                                </div>
+                                <!-- Highs -->
+                                <div class="slider-group">
+                                    <label for="high-gain" class="text-sm">Highs (10 kHz)</label>
+                                    <input type="range" id="high-gain" min="-12" max="12" value="0" step="0.1" class="w-full">
+                                    <span id="high-gain-val" class="text-xs text-indigo-300">0.0 dB</span>
+                                </div>
+                            </div>
+                        </div>
 
-        <!-- Audio Visualization -->
-        <div id="visualization-container" class="mt-8">
-            <canvas id="spectrogramCanvas" class="w-full h-96"></canvas>
-        </div>
+                        <!-- Compressor -->
+                        <div class="control-panel bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-700/50">
+                            <h3 class="text-lg font-semibold mb-4 text-purple-300">Compressor</h3>
+                            <div class="space-y-4">
+                                <div class="slider-group">
+                                    <label for="comp-threshold" class="text-sm">Threshold</label>
+                                    <input type="range" id="comp-threshold" min="-100" max="0" value="-24" step="1" class="w-full">
+                                    <span id="comp-threshold-val" class="text-xs text-indigo-300">-24 dB</span>
+                                </div>
+                                <div class="slider-group">
+                                    <label for="comp-ratio" class="text-sm">Ratio</label>
+                                    <input type="range" id="comp-ratio" min="1" max="20" value="4" step="0.1" class="w-full">
+                                    <span id="comp-ratio-val" class="text-xs text-indigo-300">4:1</span>
+                                </div>
+                                <div class="slider-group">
+                                    <label for="comp-attack" class="text-sm">Attack</label>
+                                    <input type="range" id="comp-attack" min="0" max="1" value="0.003" step="0.001" class="w-full">
+                                    <span id="comp-attack-val" class="text-xs text-indigo-300">3 ms</span>
+                                </div>
+                                <div class="slider-group">
+                                    <label for="comp-release" class="text-sm">Release</label>
+                                    <input type="range" id="comp-release" min="0.01" max="1" value="0.25" step="0.01" class="w-full">
+                                    <span id="comp-release-val" class="text-xs text-indigo-300">250 ms</span>
+                                </div>
+                            </div>
+                        </div>
 
-        <!-- Mastering & Analysis UI -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                        <!-- Noise Gate -->
+                        <div class="control-panel bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-700/50">
+                            <h3 class="text-lg font-semibold mb-4 text-purple-300">Noise Gate</h3>
+                            <div class="space-y-4">
+                                <div class="slider-group">
+                                    <label for="gate-threshold" class="text-sm">Threshold</label>
+                                    <input type="range" id="gate-threshold" min="-100" max="0" value="-40" step="1" class="w-full">
+                                    <span id="gate-threshold-val" class="text-xs text-indigo-300">-40 dB</span>
+                                </div>
+                                <div class="slider-group">
+                                    <label for="gate-attack" class="text-sm">Attack</label>
+                                    <input type="range" id="gate-attack" min="0" max="1" value="0.005" step="0.001" class="w-full">
+                                    <span id="gate-attack-val" class="text-xs text-indigo-300">5 ms</span>
+                                </div>
+                                <div class="slider-group">
+                                    <label for="gate-release" class="text-sm">Release</label>
+                                    <input type="range" id="gate-release" min="0.01" max="1" value="0.1" step="0.01" class="w-full">
+                                    <span id="gate-release-val" class="text-xs text-indigo-300">100 ms</span>
+                                </div>
+                            </div>
+                        </div>
 
-            <!-- Mastering Controls -->
-            <div class="bg-neutral-850 p-6 rounded-xl shadow-inner border border-neutral-800">
-                <h2 class="text-2xl font-semibold mb-4 text-purple-400">Real-Time Mastering</h2>
-                <!-- Noise Gate -->
-                <div class="mb-6">
-                    <h3 class="text-lg font-medium mb-2 text-neutral-300">Noise Gate</h3>
-                    <div class="flex items-center space-x-4 mb-2">
-                        <label for="gateThreshold" class="w-24 text-sm text-neutral-400">Threshold:</label>
-                        <input type="range" id="gateThreshold" min="-100" max="0" value="-50" step="1" class="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer">
-                        <span id="gateThresholdValue" class="text-sm font-mono w-12 text-right text-neutral-400">-50 dB</span>
+                        <!-- Stereo, Limiter & Output -->
+                        <div class="control-panel bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-700/50">
+                            <h3 class="text-lg font-semibold mb-4 text-purple-300">Limiter & Output</h3>
+                            <div class="space-y-4">
+                                <div class="slider-group">
+                                    <label for="limiter-threshold" class="text-sm">Limiter Threshold</label>
+                                    <input type="range" id="limiter-threshold" min="-24" max="0" value="-1.5" step="0.1" class="w-full">
+                                    <span id="limiter-threshold-val" class="text-xs text-indigo-300">-1.5 dB</span>
+                                </div>
+                                <div class="slider-group">
+                                    <label for="stereo-width" class="text-sm">Stereo Width</label>
+                                    <input type="range" id="stereo-width" min="-1" max="1" value="0" step="0.01" class="w-full">
+                                    <span id="stereo-width-val" class="text-xs text-indigo-300">Center</span>
+                                </div>
+                                <div class="slider-group">
+                                    <label for="output-gain" class="text-sm">Output Gain</label>
+                                    <input type="range" id="output-gain" min="0" max="2" value="1" step="0.01" class="w-full">
+                                    <span id="output-gain-val" class="text-xs text-indigo-300">0.0 dB</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Download Section -->
+                    <div class="mt-8 text-center">
+                        <button id="download-btn" class="px-8 py-4 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Download Mastered Track
+                        </button>
                     </div>
                 </div>
-
-                <!-- Limiter -->
-                <div>
-                    <h3 class="text-lg font-medium mb-2 text-neutral-300">Limiter</h3>
-                    <div class="flex items-center space-x-4 mb-2">
-                        <label for="limiterThreshold" class="w-24 text-sm text-neutral-400">Threshold:</label>
-                        <input type="range" id="limiterThreshold" min="-20" max="0" value="-3" step="0.5" class="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer">
-                        <span id="limiterThresholdValue" class="text-sm font-mono w-12 text-right text-neutral-400">-3 dB</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Analysis Results -->
-            <div class="bg-neutral-850 p-6 rounded-xl shadow-inner border border-neutral-800">
-                <h2 class="text-2xl font-semibold mb-4 text-purple-400">Analysis Results</h2>
-                <div class="flex items-center mb-4">
-                    <span class="text-neutral-400 w-24">BPM:</span>
-                    <span id="bpmResult" class="text-3xl font-bold text-neutral-100">-</span>
-                </div>
-                <div class="flex items-center">
-                    <span class="text-neutral-400 w-24">Key:</span>
-                    <span id="keyResult" class="text-3xl font-bold text-neutral-100">-</span>
-                </div>
-            </div>
+            </main>
         </div>
+    </div>
 
-        <!-- Message Box -->
-        <div id="messageBox" class="hidden mt-8 p-4 bg-red-800 rounded-xl text-red-200 text-center font-semibold"></div>
-
+    <!-- Loading/Processing Modal -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="bg-gray-800 p-8 rounded-lg shadow-xl text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
+            <p id="modal-text" class="mt-4 text-lg">Processing...</p>
+        </div>
     </div>
 
     <script>
-        // Use a self-invoking function to avoid global variables
-        (function() {
-            // --- UI Elements ---
-            const audioFile = document.getElementById('audioFile');
-            const playPauseBtn = document.getElementById('playPauseBtn');
-            const loadingIndicator = document.getElementById('loadingIndicator');
-            const spectrogramCanvas = document.getElementById('spectrogramCanvas');
-            const gateThreshold = document.getElementById('gateThreshold');
-            const gateThresholdValue = document.getElementById('gateThresholdValue');
-            const limiterThreshold = document.getElementById('limiterThreshold');
-            const limiterThresholdValue = document.getElementById('limiterThresholdValue');
-            const bpmResult = document.getElementById('bpmResult');
-            const keyResult = document.getElementById('keyResult');
-            const messageBox = document.getElementById('messageBox');
+        // --- DOM Element References ---
+        const uploadSection = document.getElementById('upload-section');
+        const audioFileInput = document.getElementById('audio-file');
+        const fileInfo = document.getElementById('file-info');
+        const masteringTool = document.getElementById('mastering-tool');
+        const waveformCanvas = document.getElementById('waveform');
+        const playBtn = document.getElementById('play-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const modal = document.getElementById('modal');
+        const modalText = document.getElementById('modal-text');
 
-            // --- Global State ---
-            let audioContext;
-            let sourceNode;
-            let analyserNode;
-            let gateNode;
-            let limiterNode;
-            let isPlaying = false;
-            let audioBuffer;
+        // EQ Sliders
+        const lowGainSlider = document.getElementById('low-gain');
+        const midGainSlider = document.getElementById('mid-gain');
+        const highGainSlider = document.getElementById('high-gain');
 
-            // --- Constants for Analysis ---
-            // An array of note names for easy lookup
-            const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-            
-            // Full set of Krumhansl-Schmuckler key templates for all 24 major and minor keys.
-            // These templates are used to correlate the audio's pitch content to a specific key.
-            const chromaTemplate = [
-                // Major Keys
-                [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88], // C Major
-                [2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29], // C# Major
-                [2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66], // D Major
-                [3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39], // D# Major
-                [2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19], // E Major
-                [5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52], // F Major
-                [2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09], // F# Major
-                [4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38], // G Major
-                [4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33], // G# Major
-                [2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48], // A Major
-                [3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23], // A# Major
-                [2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35], // B Major
-                // Minor Keys
-                [5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52], // C Minor
-                [2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09], // C# Minor
-                [4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38], // D Minor
-                [4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33], // D# Minor
-                [2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48], // E Minor
-                [3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23], // F Minor
-                [2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35], // F# Minor
-                [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88], // G Minor
-                [2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29], // G# Minor
-                [2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66], // A Minor
-                [3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39], // A# Minor
-                [2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19]  // B Minor
-            ];
+        // Compressor Sliders
+        const compThresholdSlider = document.getElementById('comp-threshold');
+        const compRatioSlider = document.getElementById('comp-ratio');
+        const compAttackSlider = document.getElementById('comp-attack');
+        const compReleaseSlider = document.getElementById('comp-release');
 
-            // --- Message Handling ---
-            function showMessage(msg, type = 'error') {
-                messageBox.textContent = msg;
-                messageBox.classList.remove('hidden');
-                messageBox.classList.add(type === 'error' ? 'bg-red-800' : 'bg-green-800');
-                messageBox.classList.remove(type === 'error' ? 'bg-green-800' : 'bg-red-800');
+        // Noise Gate Sliders
+        const gateThresholdSlider = document.getElementById('gate-threshold');
+        const gateAttackSlider = document.getElementById('gate-release');
+        const gateReleaseSlider = document.getElementById('gate-release');
+
+        // Limiter & Output Sliders
+        const limiterThresholdSlider = document.getElementById('limiter-threshold');
+        const stereoWidthSlider = document.getElementById('stereo-width');
+        const outputGainSlider = document.getElementById('output-gain');
+        
+        // --- State Variables ---
+        let audioContext;
+        let originalAudioBuffer;
+        let sourceNode;
+        let isPlaying = false;
+        let startTime = 0;
+        let pausedAt = 0;
+        let hasBeenTweaked = false;
+        let initialMasteredBlobUrl = null;
+
+        // Audio Nodes
+        let lowFilter, midFilter, highFilter;
+        let noiseGate;
+        let compressor;
+        let masterLimiter;
+        let stereoPanner;
+        let outputGain;
+        let analyser;
+
+        // --- Mastering Preset ---
+        const MASTERING_PRESET = {
+            'low-gain': 1.5, 'mid-gain': -1.0, 'high-gain': 2.0,
+            'comp-threshold': -18, 'comp-ratio': 2.5, 'comp-attack': 0.01, 'comp-release': 0.3,
+            'gate-threshold': -40, 'gate-attack': 0.005, 'gate-release': 0.1,
+            'limiter-threshold': -1.5,
+            'stereo-width': 0.08, 'output-gain': 1.2,
+        };
+
+        // --- Core Functions ---
+        function initAudioContext() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                setupAudioNodes();
+            } catch (e) {
+                // Use a modal message instead of alert
+                showModal('Web Audio API is not supported in this browser.', true);
             }
+        }
 
-            function hideMessage() {
-                messageBox.classList.add('hidden');
+        function setupAudioNodes() {
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 2048;
+
+            // EQ Nodes
+            lowFilter = audioContext.createBiquadFilter();
+            lowFilter.type = 'lowshelf'; lowFilter.frequency.value = 100;
+            midFilter = audioContext.createBiquadFilter();
+            midFilter.type = 'peaking'; midFilter.frequency.value = 1000; midFilter.Q.value = 1;
+            highFilter = audioContext.createBiquadFilter();
+            highFilter.type = 'highshelf'; highFilter.frequency.value = 10000;
+
+            // Dynamics Nodes
+            noiseGate = audioContext.createDynamicsCompressor();
+            noiseGate.ratio.value = 100; // High ratio for gate effect
+            noiseGate.knee.value = 0; // Hard knee for gate
+            compressor = audioContext.createDynamicsCompressor();
+            masterLimiter = audioContext.createDynamicsCompressor();
+            masterLimiter.ratio.value = 20; // High ratio for limiter
+            masterLimiter.knee.value = 0; // Hard knee for limiter
+
+            // Imaging & Gain Nodes
+            stereoPanner = audioContext.createStereoPanner();
+            outputGain = audioContext.createGain();
+
+            // Connect the audio processing chain
+            lowFilter.connect(midFilter);
+            midFilter.connect(highFilter);
+            highFilter.connect(noiseGate);
+            noiseGate.connect(compressor);
+            compressor.connect(masterLimiter);
+            masterLimiter.connect(stereoPanner);
+            stereoPanner.connect(outputGain);
+            outputGain.connect(analyser);
+            analyser.connect(audioContext.destination);
+        }
+
+        function handleFileUpload(file) {
+            if (!file) return;
+            showModal(`Loading "${file.name}"...`);
+            fileInfo.textContent = `File: ${file.name}`;
+            fileInfo.classList.remove('hidden');
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (!audioContext) initAudioContext();
+                audioContext.decodeAudioData(e.target.result)
+                    .then(async decodedBuffer => {
+                        originalAudioBuffer = decodedBuffer;
+                        
+                        showModal("Applying professional master...");
+                        await applyPresetAndRenderInitial();
+                        
+                        masteringTool.classList.remove('hidden');
+                        uploadSection.style.maxHeight = '0'; // Animate collapse
+                        uploadSection.style.opacity = '0';
+                        uploadSection.style.padding = '0';
+                        uploadSection.style.margin = '0';
+                        uploadSection.style.overflow = 'hidden';
+                        
+                        drawWaveform(); // Start the real-time analyzer
+                        hideModal();
+                    })
+                    .catch(err => {
+                        showModal('Error decoding audio file. Please try a different format.', true);
+                        console.error(err);
+                    });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function applyPresetAndRenderInitial() {
+            for (const [id, value] of Object.entries(MASTERING_PRESET)) {
+                const slider = document.getElementById(id);
+                if (slider) {
+                    slider.value = value;
+                    updateSliderValueDisplay(slider);
+                }
             }
-
-            // --- Core Audio Functions ---
-
-            /**
-             * Initializes the audio processing chain: source -> analyser -> gate -> limiter -> destination.
-             */
-            function initializeAudioChain() {
-                // Initialize AudioContext if it doesn't exist
-                if (!audioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
-
-                // Create nodes
-                sourceNode = audioContext.createBufferSource();
-                sourceNode.buffer = audioBuffer;
-                
-                analyserNode = audioContext.createAnalyser();
-                // Set FFT size to a larger value for more accurate frequency analysis
-                analyserNode.fftSize = 2048; 
-
-                // Noise Gate Node (uses DynamicsCompressorNode)
-                gateNode = audioContext.createDynamicsCompressor();
-                gateNode.threshold.setValueAtTime(parseFloat(gateThreshold.value), audioContext.currentTime);
-                gateNode.ratio.setValueAtTime(20, audioContext.currentTime); // High ratio for gate
-                gateNode.knee.setValueAtTime(0, audioContext.currentTime); // Hard knee
-                gateNode.attack.setValueAtTime(0.01, audioContext.currentTime); // Fast attack
-                gateNode.release.setValueAtTime(0.1, audioContext.currentTime); // Fast release
-
-                // Limiter Node (also a DynamicsCompressorNode, with infinite ratio)
-                limiterNode = audioContext.createDynamicsCompressor();
-                limiterNode.threshold.setValueAtTime(parseFloat(limiterThreshold.value), audioContext.currentTime);
-                limiterNode.ratio.setValueAtTime(100, audioContext.currentTime); // "Infinite" ratio
-                limiterNode.attack.setValueAtTime(0, audioContext.currentTime); // Instant attack
-                limiterNode.release.setValueAtTime(0.05, audioContext.currentTime); // Fast release
-
-                // Connect the nodes in the processing chain
-                sourceNode.connect(analyserNode);
-                analyserNode.connect(gateNode);
-                gateNode.connect(limiterNode);
-                limiterNode.connect(audioContext.destination);
-
-                // Set up event listener for when the audio finishes
-                sourceNode.onended = () => {
-                    isPlaying = false;
-                    playPauseBtn.textContent = 'Play / Pause';
-                };
+            updateAllParams();
+            const blob = await renderAudioOffline();
+            if (blob) {
+                initialMasteredBlobUrl = URL.createObjectURL(blob);
+                downloadBtn.disabled = false;
+            } else {
+                showModal("Failed to render the initial master.", true);
             }
+        }
 
-            /**
-             * BPM detection using onset detection and autocorrelation.
-             * This is a simplified but more robust algorithm than previous versions.
-             * It processes the full audio buffer offline.
-             */
-            function detectBPM(buffer) {
-                const sampleRate = buffer.sampleRate;
-                const channelData = buffer.getChannelData(0); // Use one channel
-                const hopSize = 512; // Number of samples between analysis frames
-                const fftSize = 1024;
-                const bufferSize = 2048;
-
-                // Simple onset detection function (ODF) based on energy difference
-                const odf = [];
-                let prevEnergy = 0;
-                for (let i = 0; i < channelData.length - fftSize; i += hopSize) {
-                    let energy = 0;
-                    for (let j = 0; j < fftSize; j++) {
-                        energy += Math.pow(channelData[i + j], 2);
-                    }
-                    const diff = energy - prevEnergy;
-                    odf.push(diff > 0 ? diff : 0);
-                    prevEnergy = energy;
-                }
-                
-                // Autocorrelation to find repeating patterns (BPM)
-                const ac = new Array(odf.length).fill(0);
-                for (let tau = 0; tau < odf.length; tau++) {
-                    for (let i = 0; i < odf.length - tau; i++) {
-                        ac[tau] += odf[i] * odf[i + tau];
-                    }
-                }
-
-                // Find the peak in the autocorrelation that corresponds to a reasonable BPM range
-                const minLag = Math.floor(sampleRate / (300 / 60)); // 300 BPM
-                const maxLag = Math.floor(sampleRate / (40 / 60));  // 40 BPM
-                let maxCorrelation = 0;
-                let bestLag = 0;
-
-                for (let i = minLag; i < maxLag; i++) {
-                    if (ac[i] > maxCorrelation) {
-                        maxCorrelation = ac[i];
-                        bestLag = i;
-                    }
-                }
-
-                if (bestLag === 0) {
-                    return 0;
-                }
-
-                // Calculate BPM from the best lag
-                const bpm = 60 / ((bestLag * hopSize) / sampleRate);
-                return Math.round(bpm);
+        function play() {
+            if (isPlaying || !originalAudioBuffer) return;
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
             }
+            sourceNode = audioContext.createBufferSource();
+            sourceNode.buffer = originalAudioBuffer;
+            sourceNode.connect(lowFilter);
+            const offset = pausedAt % originalAudioBuffer.duration;
+            sourceNode.start(0, offset);
+            startTime = audioContext.currentTime - offset;
+            isPlaying = true;
+            pausedAt = 0;
+            playBtn.classList.add('hidden');
+            pauseBtn.classList.remove('hidden');
+            sourceNode.onended = () => { if (isPlaying) stop(); };
+        }
 
-            /**
-             * Key detection using chromagram and key templates.
-             * Processes the full audio buffer offline.
-             */
-            function detectKey(buffer) {
-                const sampleRate = buffer.sampleRate;
-                const channelData = buffer.getChannelData(0);
-                const fftSize = 4096;
-                const hopSize = 2048;
-                let chromaVector = new Array(12).fill(0);
-                let totalFrames = 0;
+        function pause() {
+            if (!isPlaying || !sourceNode) return;
+            pausedAt = audioContext.currentTime - startTime;
+            sourceNode.stop();
+            isPlaying = false;
+            playBtn.classList.remove('hidden');
+            pauseBtn.classList.add('hidden');
+            audioContext.suspend();
+        }
 
-                // Process audio in chunks
-                for (let i = 0; i < channelData.length - fftSize; i += hopSize) {
-                    const frame = channelData.slice(i, i + fftSize);
-                    
-                    // Simple FFT calculation (for demonstration, a full FFT library would be more accurate)
-                    // We'll simulate pitch class profiles by summing energy in frequency bins.
-                    const frameChroma = new Array(12).fill(0);
-                    
-                    // This is a simplified and rough approximation. A real-world app would use a
-                    // dedicated FFT library and more complex pitch detection algorithms.
-                    const minFreq = 60; // C2
-                    const maxFreq = 6000;
-                    
-                    for (let j = 0; j < frame.length; j++) {
-                        const freq = j * sampleRate / fftSize;
-                        if (freq > minFreq && freq < maxFreq) {
-                            const noteIndex = Math.round(12 * (Math.log2(freq / 440)) + 9) % 12;
-                            if (noteIndex >= 0) {
-                                frameChroma[noteIndex] += Math.abs(frame[j]);
-                            }
-                        }
-                    }
-
-                    // Normalize and add to total chroma vector
-                    const sum = frameChroma.reduce((a, b) => a + b, 0);
-                    if (sum > 0) {
-                        for (let j = 0; j < 12; j++) {
-                            chromaVector[j] += frameChroma[j] / sum;
-                        }
-                        totalFrames++;
-                    }
-                }
-                
-                if (totalFrames > 0) {
-                    chromaVector = chromaVector.map(val => val / totalFrames);
-                } else {
-                    return "N/A";
-                }
-
-                // Correlate with key templates
-                let maxCorrelation = -1;
-                let bestKey = "N/A";
-
-                for (let i = 0; i < chromaTemplate.length; i++) {
-                    const template = chromaTemplate[i];
-                    let correlation = 0;
-                    for (let j = 0; j < 12; j++) {
-                        correlation += chromaVector[j] * template[j];
-                    }
-                    if (correlation > maxCorrelation) {
-                        maxCorrelation = correlation;
-                        const note = noteNames[i % 12];
-                        const type = i < 12 ? 'Major' : 'Minor';
-                        bestKey = `${note} ${type}`;
-                    }
-                }
-
-                return bestKey;
+        function stop() {
+            if (sourceNode) {
+                if (isPlaying) sourceNode.stop();
+                sourceNode.disconnect();
+                sourceNode = null;
             }
-
-            /**
-             * Draws the spectrogram visualization on the canvas.
-             */
-            function drawSpectrogram() {
-                const canvasCtx = spectrogramCanvas.getContext('2d');
-                const WIDTH = spectrogramCanvas.width;
-                const HEIGHT = spectrogramCanvas.height;
-
-                analyserNode.fftSize = 2048; // Set the size for visualization
-                const bufferLength = analyserNode.frequencyBinCount;
-                const dataArray = new Uint8Array(bufferLength);
-
-                function draw() {
-                    requestAnimationFrame(draw);
-                    analyserNode.getByteFrequencyData(dataArray);
-
-                    // Create gradient for better visuals
-                    const gradient = canvasCtx.createLinearGradient(0, 0, 0, HEIGHT);
-                    gradient.addColorStop(0, 'rgba(124, 58, 237, 0.8)'); // Purple
-                    gradient.addColorStop(0.5, 'rgba(124, 58, 237, 0.4)');
-                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-
-                    canvasCtx.fillStyle = '#0f0f0f';
-                    canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
-                    canvasCtx.fillStyle = gradient;
-
-                    const barWidth = (WIDTH / bufferLength) * 2.5;
-                    let barHeight;
-                    let x = 0;
-
-                    for (let i = 0; i < bufferLength; i++) {
-                        barHeight = dataArray[i];
-                        canvasCtx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
-                        x += barWidth + 1;
-                    }
-                };
-                draw();
+            isPlaying = false;
+            pausedAt = 0;
+            startTime = 0;
+            playBtn.classList.remove('hidden');
+            pauseBtn.classList.add('hidden');
+            if (audioContext.state === 'running') {
+                audioContext.suspend();
             }
+        }
 
-            // --- Event Listeners ---
+        // --- UI Update & Event Listeners ---
+        function updateAllParams() {
+            if (!audioContext) return;
+            lowFilter.gain.value = parseFloat(lowGainSlider.value);
+            midFilter.gain.value = parseFloat(midGainSlider.value);
+            highFilter.gain.value = parseFloat(highGainSlider.value);
+            compressor.threshold.value = parseFloat(compThresholdSlider.value);
+            compressor.ratio.value = parseFloat(compRatioSlider.value);
+            compressor.attack.value = parseFloat(compAttackSlider.value);
+            compressor.release.value = parseFloat(compReleaseSlider.value);
+            noiseGate.threshold.value = parseFloat(gateThresholdSlider.value);
+            noiseGate.attack.value = parseFloat(gateAttackSlider.value);
+            noiseGate.release.value = parseFloat(gateReleaseSlider.value);
+            masterLimiter.threshold.value = parseFloat(limiterThresholdSlider.value);
+            stereoPanner.pan.value = parseFloat(stereoWidthSlider.value);
+            outputGain.gain.value = parseFloat(outputGainSlider.value);
+        }
 
-            // File input handler
-            audioFile.addEventListener('change', async (event) => {
-                const file = event.target.files[0];
-                if (!file) return;
-
-                hideMessage();
-                loadingIndicator.classList.remove('hidden');
-                playPauseBtn.disabled = true;
-
-                try {
-                    const arrayBuffer = await file.arrayBuffer();
-                    if (!audioContext) {
-                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    }
-                    audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-                    // Run offline analysis
-                    const bpm = detectBPM(audioBuffer);
-                    const key = detectKey(audioBuffer);
-                    bpmResult.textContent = `${bpm}`;
-                    keyResult.textContent = key;
-                    
-                    initializeAudioChain();
-                    playPauseBtn.disabled = false;
-                    loadingIndicator.classList.add('hidden');
-                    showMessage("Audio loaded and analyzed successfully!", 'success');
-                    
-                } catch (e) {
-                    console.error('Error decoding audio:', e);
-                    showMessage('Error decoding audio. Please try a different file. Common audio formats like MP3 and WAV work best.');
-                    playPauseBtn.disabled = true;
-                    loadingIndicator.classList.add('hidden');
-                }
+        function setupEventListeners() {
+            audioFileInput.addEventListener('change', (e) => handleFileUpload(e.target.files[0]));
+            const dropZone = uploadSection.querySelector('label');
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.add('bg-gray-700'); });
+            dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.remove('bg-gray-700'); });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault(); e.stopPropagation(); dropZone.classList.remove('bg-gray-700');
+                const files = e.dataTransfer.files;
+                if (files.length) { audioFileInput.files = files; handleFileUpload(files[0]); }
             });
-
-            // Play/Pause button handler
-            playPauseBtn.addEventListener('click', () => {
-                if (!sourceNode) {
-                    showMessage("Please upload an audio file first.", 'error');
-                    return;
-                }
-                
-                if (audioContext.state === 'suspended') {
-                    audioContext.resume();
-                    isPlaying = true;
-                    playPauseBtn.textContent = 'Pause';
-                } else if (audioContext.state === 'running') {
-                    audioContext.suspend();
-                    isPlaying = false;
-                    playPauseBtn.textContent = 'Play';
-                }
-                
-                // Start the visualization on play/pause click
-                if (isPlaying) {
-                    drawSpectrogram();
-                }
-            });
-
-            // Mastering control listeners
-            gateThreshold.addEventListener('input', (e) => {
-                const value = parseFloat(e.target.value);
-                gateThresholdValue.textContent = `${value} dB`;
-                if (gateNode) {
-                    gateNode.threshold.setValueAtTime(value, audioContext.currentTime);
-                }
-            });
-
-            limiterThreshold.addEventListener('input', (e) => {
-                const value = parseFloat(e.target.value);
-                limiterThresholdValue.textContent = `${value} dB`;
-                if (limiterNode) {
-                    limiterNode.threshold.setValueAtTime(value, audioContext.currentTime);
-                }
-            });
-
-            // Initial UI setup on page load
-            window.addEventListener('load', () => {
-                // Initial values for sliders
-                gateThresholdValue.textContent = `${gateThreshold.value} dB`;
-                limiterThresholdValue.textContent = `${limiterThreshold.value} dB`;
-
-                // Set canvas size for responsiveness
-                const container = document.getElementById('visualization-container');
-                const resizeObserver = new ResizeObserver(entries => {
-                    for (let entry of entries) {
-                        const { width, height } = entry.contentRect;
-                        spectrogramCanvas.width = width;
-                        spectrogramCanvas.height = height;
+            playBtn.addEventListener('click', play);
+            pauseBtn.addEventListener('click', pause);
+            stopBtn.addEventListener('click', stop);
+            const sliders = document.querySelectorAll('input[type=range]');
+            sliders.forEach(slider => {
+                slider.addEventListener('input', () => {
+                    if (!hasBeenTweaked) {
+                        hasBeenTweaked = true;
+                        downloadBtn.textContent = 'Re-Master & Download';
                     }
+                    updateAllParams();
+                    updateSliderValueDisplay(slider);
                 });
-                resizeObserver.observe(container);
             });
-        })();
+            downloadBtn.addEventListener('click', handleDownload);
+        }
+
+        function updateSliderValueDisplay(slider) {
+            const displayId = slider.id + '-val';
+            const displayEl = document.getElementById(displayId);
+            if (!displayEl) return;
+            let value = parseFloat(slider.value).toFixed(1);
+            switch (slider.id) {
+                case 'low-gain': case 'mid-gain': case 'high-gain':
+                case 'limiter-threshold': displayEl.textContent = `${value} dB`; break;
+                case 'comp-threshold': case 'gate-threshold': displayEl.textContent = `${parseInt(slider.value)} dB`; break;
+                case 'comp-ratio': displayEl.textContent = `${value}:1`; break;
+                case 'comp-attack': case 'comp-release': case 'gate-attack': case 'gate-release':
+                    displayEl.textContent = `${(parseFloat(slider.value) * 1000).toFixed(0)} ms`; break;
+                case 'stereo-width':
+                    const width = parseFloat(slider.value);
+                    if (Math.abs(width) < 0.05) displayEl.textContent = 'Center';
+                    else if (width < 0) displayEl.textContent = `${Math.round(-width * 100)}% Left`;
+                    else displayEl.textContent = `${Math.round(width * 100)}% Right`;
+                    break;
+                case 'output-gain':
+                    const db = 20 * Math.log10(parseFloat(slider.value));
+                    displayEl.textContent = `${db.toFixed(1)} dB`; break;
+            }
+        }
+        
+        // --- Visualization ---
+        function drawWaveform() {
+            if (!analyser) return;
+            const canvasCtx = waveformCanvas.getContext('2d');
+            const width = waveformCanvas.width;
+            const height = waveformCanvas.height;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            canvasCtx.clearRect(0, 0, width, height);
+
+            function draw() {
+                requestAnimationFrame(draw);
+                analyser.getByteTimeDomainData(dataArray);
+                canvasCtx.fillStyle = '#111827';
+                canvasCtx.fillRect(0, 0, width, height);
+                canvasCtx.lineWidth = 2;
+                canvasCtx.strokeStyle = '#8b5cf6';
+                canvasCtx.beginPath();
+                const sliceWidth = width * 1.0 / bufferLength;
+                let x = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    const v = dataArray[i] / 128.0;
+                    const y = v * height / 2;
+                    if (i === 0) canvasCtx.moveTo(x, y);
+                    else canvasCtx.lineTo(x, y);
+                    x += sliceWidth;
+                }
+                canvasCtx.lineTo(width, height / 2);
+                canvasCtx.stroke();
+            }
+            draw();
+        }
+
+        // --- Audio Rendering & Download ---
+        async function renderAudioOffline() {
+            showModal("Re-rendering audio with effects...");
+            const duration = originalAudioBuffer.duration;
+            const offlineCtx = new OfflineAudioContext(originalAudioBuffer.numberOfChannels, originalAudioBuffer.sampleRate * duration, originalAudioBuffer.sampleRate);
+
+            // Recreate the entire audio graph for the offline context
+            const source = offlineCtx.createBufferSource();
+            source.buffer = originalAudioBuffer;
+            
+            const lowFilterOffline = offlineCtx.createBiquadFilter();
+            lowFilterOffline.type = 'lowshelf'; lowFilterOffline.frequency.value = 100;
+            lowFilterOffline.gain.value = lowFilter.gain.value;
+
+            const midFilterOffline = offlineCtx.createBiquadFilter();
+            midFilterOffline.type = 'peaking'; midFilterOffline.frequency.value = 1000; midFilterOffline.Q.value = 1;
+            midFilterOffline.gain.value = midFilter.gain.value;
+
+            const highFilterOffline = offlineCtx.createBiquadFilter();
+            highFilterOffline.type = 'highshelf'; highFilterOffline.frequency.value = 10000;
+            highFilterOffline.gain.value = highFilter.gain.value;
+
+            const noiseGateOffline = offlineCtx.createDynamicsCompressor();
+            noiseGateOffline.threshold.value = noiseGate.threshold.value;
+            noiseGateOffline.ratio.value = 100;
+            noiseGateOffline.knee.value = 0;
+            noiseGateOffline.attack.value = noiseGate.attack.value;
+            noiseGateOffline.release.value = noiseGate.release.value;
+
+            const compressorOffline = offlineCtx.createDynamicsCompressor();
+            compressorOffline.threshold.value = compressor.threshold.value;
+            compressorOffline.ratio.value = compressor.ratio.value;
+            compressorOffline.attack.value = compressor.attack.value;
+            compressorOffline.release.value = compressor.release.value;
+
+            const masterLimiterOffline = offlineCtx.createDynamicsCompressor();
+            masterLimiterOffline.threshold.value = masterLimiter.threshold.value;
+            masterLimiterOffline.ratio.value = 20;
+            masterLimiterOffline.knee.value = 0;
+
+            const stereoPannerOffline = offlineCtx.createStereoPanner();
+            stereoPannerOffline.pan.value = stereoPanner.pan.value;
+
+            const outputGainOffline = offlineCtx.createGain();
+            outputGainOffline.gain.value = outputGain.gain.value;
+
+            // Connect the offline audio graph
+            source.connect(lowFilterOffline);
+            lowFilterOffline.connect(midFilterOffline);
+            midFilterOffline.connect(highFilterOffline);
+            highFilterOffline.connect(noiseGateOffline);
+            noiseGateOffline.connect(compressorOffline);
+            compressorOffline.connect(masterLimiterOffline);
+            masterLimiterOffline.connect(stereoPannerOffline);
+            stereoPannerOffline.connect(outputGainOffline);
+            outputGainOffline.connect(offlineCtx.destination);
+            
+            source.start(0);
+
+            try {
+                const renderedBuffer = await offlineCtx.startRendering();
+                return bufferToWave(renderedBuffer, renderedBuffer.numberOfChannels);
+            } catch (e) {
+                console.error("Offline rendering failed: ", e);
+                return null;
+            }
+        }
+
+        async function handleDownload() {
+            if (!originalAudioBuffer) {
+                showModal("Please upload a file first.", true);
+                return;
+            }
+            stop();
+            if (!hasBeenTweaked && initialMasteredBlobUrl) {
+                downloadFile(initialMasteredBlobUrl, 'mastered_track');
+            } else {
+                const blob = await renderAudioOffline();
+                if (blob) {
+                    downloadFile(URL.createObjectURL(blob), 'custom_mastered_track');
+                }
+            }
+        }
+
+        function downloadFile(blobUrl, filename) {
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = blobUrl;
+            a.download = filename + '.wav';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+            hideModal();
+        }
+
+        /**
+         * Converts a raw audio buffer to a WAV file blob.
+         * @param {AudioBuffer} abuffer
+         * @param {number} numChannels
+         */
+        function bufferToWave(abuffer, numChannels) {
+            const numOfChan = numChannels;
+            const length = abuffer.length * numOfChan * 2 + 44;
+            const buffer = new ArrayBuffer(length);
+            const view = new DataView(buffer);
+            let offset = 0;
+
+            // RIFF identifier 'RIFF'
+            writeString(view, offset, 'RIFF'); offset += 4;
+            // file length
+            view.setUint32(offset, length - 8, true); offset += 4;
+            // RIFF type 'WAVE'
+            writeString(view, offset, 'WAVE'); offset += 4;
+            // format chunk identifier 'fmt '
+            writeString(view, offset, 'fmt '); offset += 4;
+            // format chunk length
+            view.setUint32(offset, 16, true); offset += 4;
+            // sample format (1 for PCM)
+            view.setUint16(offset, 1, true); offset += 2;
+            // channel count
+            view.setUint16(offset, numOfChan, true); offset += 2;
+            // sample rate
+            view.setUint32(offset, abuffer.sampleRate, true); offset += 4;
+            // byte rate (sample rate * block align)
+            view.setUint32(offset, abuffer.sampleRate * numOfChan * 2, true); offset += 4;
+            // block align (channel count * bytes per sample)
+            view.setUint16(offset, numOfChan * 2, true); offset += 2;
+            // bits per sample
+            view.setUint16(offset, 16, true); offset += 2;
+            // data chunk identifier 'data'
+            writeString(view, offset, 'data'); offset += 4;
+            // data chunk length
+            view.setUint32(offset, length - offset - 4, true); offset += 4;
+
+            // Write PCM audio data
+            let channelData = [];
+            for (let i = 0; i < numOfChan; i++) {
+                channelData.push(abuffer.getChannelData(i));
+            }
+            for (let i = 0; i < abuffer.length; i++) {
+                for (let j = 0; j < numOfChan; j++) {
+                    let s = Math.max(-1, Math.min(1, channelData[j][i]));
+                    s = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                    view.setInt16(offset, s, true);
+                    offset += 2;
+                }
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+
+            function writeString(view, offset, string) {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            }
+        }
+
+        // --- Modal Functions ---
+        function showModal(message, isAlert = false) {
+            modalText.textContent = message;
+            modal.classList.remove('hidden');
+            if (isAlert) {
+                modal.querySelector('div').innerHTML += '<button onclick="hideModal()" class="mt-4 px-4 py-2 bg-purple-500 rounded">OK</button>';
+            }
+        }
+
+        function hideModal() {
+            modal.classList.add('hidden');
+            const alertButton = modal.querySelector('button');
+            if (alertButton) alertButton.remove();
+        }
+
+        // Initial setup
+        window.addEventListener('load', setupEventListeners);
     </script>
 </body>
 </html>
