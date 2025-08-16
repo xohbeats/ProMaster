@@ -136,32 +136,38 @@
             let audioBuffer;
 
             // --- Constants for Analysis ---
-            const majorKeys = [
-                // C Maj
-                [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88],
-                // C# Maj
-                [2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29],
-                // ... (add all 12 major and 12 minor templates)
-            ];
-            const minorKeys = [
-                // C Min
-                [5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52],
-                // C# Min
-                [2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09]
-                // ... (add all 12 major and 12 minor templates)
-            ];
             // An array of note names for easy lookup
             const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+            
+            // Full set of Krumhansl-Schmuckler key templates for all 24 major and minor keys.
+            // These templates are used to correlate the audio's pitch content to a specific key.
             const chromaTemplate = [
-                // C Major
-                [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88],
-                // C Minor
-                [5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52],
-                // D Major
-                [2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29],
-                // D Minor
-                [2.29, 2.88, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38],
-                // and so on for all 24 keys...
+                // Major Keys
+                [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88], // C Major
+                [2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29], // C# Major
+                [2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66], // D Major
+                [3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39], // D# Major
+                [2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19], // E Major
+                [5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52], // F Major
+                [2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09], // F# Major
+                [4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38], // G Major
+                [4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33], // G# Major
+                [2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48], // A Major
+                [3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23], // A# Major
+                [2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35], // B Major
+                // Minor Keys
+                [5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52], // C Minor
+                [2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09], // C# Minor
+                [4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38], // D Minor
+                [4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33], // D# Minor
+                [2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48], // E Minor
+                [3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23], // F Minor
+                [2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35], // F# Minor
+                [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88], // G Minor
+                [2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29], // G# Minor
+                [2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66], // A Minor
+                [3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39], // A# Minor
+                [2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19]  // B Minor
             ];
 
             // --- Message Handling ---
@@ -333,7 +339,7 @@
                 let maxCorrelation = -1;
                 let bestKey = "N/A";
 
-                for (let i = 0; i < 24; i++) {
+                for (let i = 0; i < chromaTemplate.length; i++) {
                     const template = chromaTemplate[i];
                     let correlation = 0;
                     for (let j = 0; j < 12; j++) {
@@ -418,15 +424,9 @@
                     loadingIndicator.classList.add('hidden');
                     showMessage("Audio loaded and analyzed successfully!", 'success');
                     
-                    // Automatically start playing on file load
-                    sourceNode.start(0);
-                    isPlaying = true;
-                    playPauseBtn.textContent = 'Pause';
-                    drawSpectrogram();
-
                 } catch (e) {
                     console.error('Error decoding audio:', e);
-                    showMessage('Error decoding audio. Please try a different file.');
+                    showMessage('Error decoding audio. Please try a different file. Common audio formats like MP3 and WAV work best.');
                     playPauseBtn.disabled = true;
                     loadingIndicator.classList.add('hidden');
                 }
@@ -434,6 +434,11 @@
 
             // Play/Pause button handler
             playPauseBtn.addEventListener('click', () => {
+                if (!sourceNode) {
+                    showMessage("Please upload an audio file first.", 'error');
+                    return;
+                }
+                
                 if (audioContext.state === 'suspended') {
                     audioContext.resume();
                     isPlaying = true;
@@ -442,6 +447,11 @@
                     audioContext.suspend();
                     isPlaying = false;
                     playPauseBtn.textContent = 'Play';
+                }
+                
+                // Start the visualization on play/pause click
+                if (isPlaying) {
+                    drawSpectrogram();
                 }
             });
 
